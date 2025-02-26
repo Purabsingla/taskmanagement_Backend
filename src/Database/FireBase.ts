@@ -3,7 +3,7 @@ import { getFirestore } from "firebase-admin/firestore";
 import path from "path";
 
 // ✅ Load Firebase Service Account Key
-const serviceAccountPath = path.resolve(__dirname, "../ApplicationKey.json");
+const serviceAccountPath = path.resolve(__dirname, "../../ApplicationKey.json");
 const serviceAccount = require(serviceAccountPath);
 
 // ✅ Initialize Firebase Admin SDK
