@@ -3,14 +3,28 @@ import { db } from "../Database/FireBase";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 
 // Add a user
+// export const addUser = async (req: Request, res: Response) => {
+//   try {
+//     const { name, email } = req.body;
+//     const docRef = await addDoc(collection(db, "users"), { name, email });
+
+//     res.json({ message: "User added", id: docRef.id });
+//   } catch (error: any) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
 export const addUser = async (req: Request, res: Response) => {
   try {
     const { name, email } = req.body;
-    const docRef = await addDoc(collection(db, "users"), { name, email });
+
+    // ✅ Correct way to get collection in Firebase Admin SDK
+    const usersCollection = db.collection("users");
+    const docRef = await usersCollection.add({ name, email });
 
     res.json({ message: "User added", id: docRef.id });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    res.status(500).json({ error: (error as Error).message });
   }
 };
 
