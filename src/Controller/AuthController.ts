@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { db, admin } from "../Database/FireBase";
 import bycrypt from "bcryptjs";
 
-const signup = async (req: Request, res: Response) => {
+export const signup = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   try {
     const HashedPassword = await bycrypt.hash(password, 10);
@@ -23,7 +23,7 @@ const signup = async (req: Request, res: Response) => {
   }
 };
 
-const Login = async (req: Request, res: Response) => {
+export const Login = async (req: Request, res: Response): Promise<void> => {
   const { email, password } = req.body;
 
   try {
@@ -32,7 +32,8 @@ const Login = async (req: Request, res: Response) => {
       .where("email", "==", email)
       .get();
     if (userData.empty) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      res.status(401).json({ message: "Invalid email or password" });
+      return;
     }
 
     const user = userData.docs[0].data();
@@ -40,7 +41,8 @@ const Login = async (req: Request, res: Response) => {
 
     const isMatch = await bycrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      res.status(401).json({ message: "Invalid email or password" });
+      return;
     }
 
     // Generate Firebase custom token (Optional)
@@ -56,7 +58,7 @@ const Login = async (req: Request, res: Response) => {
   }
 };
 
-const signupdetails = async (req: Request, res: Response) => {
+export const signupdetails = async (req: Request, res: Response) => {
   const { uid, name, phone } = req.body;
   try {
     await db.collection("users").doc(uid).set(
@@ -76,5 +78,3 @@ const signupdetails = async (req: Request, res: Response) => {
     });
   }
 };
-
-module.exports = { signup, signupdetails };
