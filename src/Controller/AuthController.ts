@@ -23,6 +23,39 @@ const signup = async (req: Request, res: Response) => {
   }
 };
 
+const Login = async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+
+  try {
+    const userData = await db
+      .collection("users")
+      .where("email", "==", email)
+      .get();
+    if (userData.empty) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    const user = userData.docs[0].data();
+    const userId = userData.docs[0].id;
+
+    const isMatch = await bycrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    // Generate Firebase custom token (Optional)
+    const customToken = await admin.auth().createCustomToken(userId);
+
+    res
+      .status(200)
+      .json({ uid: userId, token: customToken, message: "Login successful" });
+  } catch (err) {
+    res.status(500).send({
+      message: (err as Error).message,
+    });
+  }
+};
+
 const signupdetails = async (req: Request, res: Response) => {
   const { uid, name, phone } = req.body;
   try {
@@ -36,22 +69,6 @@ const signupdetails = async (req: Request, res: Response) => {
     );
     res.status(200).send({
       message: "User details saved successfully",
-    });
-  } catch (err) {
-    res.status(500).send({
-      message: (err as Error).message,
-    });
-  }
-};
-
-const Login = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
-
-  try {
-    const userData = await admin.auth().getUserByEmail(email);
-    res.status(200).send({
-      message: "User created",
-      data: userData,
     });
   } catch (err) {
     res.status(500).send({
